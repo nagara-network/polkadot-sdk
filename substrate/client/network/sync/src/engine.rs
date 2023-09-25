@@ -44,7 +44,7 @@ use futures::{
 	future::{BoxFuture, Fuse},
 	FutureExt, StreamExt,
 };
-use libp2p::{request_response::OutboundFailure, PeerId};
+use libp2p::request_response::OutboundFailure;
 use log::{debug, trace};
 use prometheus_endpoint::{
 	register, Counter, Gauge, GaugeVec, MetricSource, Opts, PrometheusError, Registry,
@@ -72,6 +72,7 @@ use sc_network_common::{
 	role::Roles,
 	sync::message::{BlockAnnounce, BlockAnnouncesHandshake, BlockRequest, BlockState},
 };
+use sc_network_types::PeerId;
 use sc_utils::mpsc::{tracing_unbounded, TracingUnboundedReceiver, TracingUnboundedSender};
 use sp_blockchain::{Error as ClientError, HeaderMetadata};
 use sp_consensus::{block_validation::BlockAnnounceValidator, BlockOrigin};
