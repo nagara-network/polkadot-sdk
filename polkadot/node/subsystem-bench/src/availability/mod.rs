@@ -53,7 +53,7 @@ use polkadot_node_primitives::{AvailableData, ErasureChunk};
 use super::{cli::TestObjective, core::mock::AlwaysSupportsParachains};
 use polkadot_node_subsystem_test_helpers::mock::new_block_import_info;
 use polkadot_primitives::{
-	CandidateHash, CandidateReceipt, GroupIndex, Hash, HeadData, PersistedValidationData,
+	Block, CandidateHash, CandidateReceipt, GroupIndex, Hash, HeadData, PersistedValidationData,
 };
 use polkadot_primitives_test_helpers::{dummy_candidate_receipt, dummy_hash};
 use sc_service::SpawnTaskHandle;
@@ -122,8 +122,10 @@ fn prepare_test_inner(
 		_ => panic!("Unexpected objective"),
 	};
 
-	let (collation_req_receiver, req_cfg) =
-		IncomingRequest::get_config_receiver(&ReqProtocolNames::new(GENESIS_HASH, None));
+	let (collation_req_receiver, req_cfg) = IncomingRequest::get_config_receiver::<
+		Block,
+		sc_network::NetworkWorker<Block, Hash>,
+	>(&ReqProtocolNames::new(GENESIS_HASH, None));
 
 	let subsystem = if use_fast_path {
 		AvailabilityRecoverySubsystem::with_fast_path(

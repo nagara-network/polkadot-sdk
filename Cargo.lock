@@ -12895,6 +12895,7 @@ dependencies = [
  "sc-authority-discovery",
  "sc-network",
  "sc-network-types",
+ "sp-runtime",
  "strum 0.24.1",
  "thiserror",
  "tracing-gum",
@@ -16110,6 +16111,7 @@ dependencies = [
  "sc-network-sync",
  "sc-network-types",
  "sp-consensus",
+ "sp-runtime",
  "sp-statement-store",
  "substrate-prometheus-endpoint",
 ]
