@@ -185,7 +185,7 @@ impl HostFn for HostFnImpl {
 		todo!()
 	}
 
-	fn call_chain_extension(func_id: u32, input: &[u8], output: &mut &mut [u8]) -> u32 {
+	fn call_chain_extension(func_id: u32, input: &[u8], output: Option<&mut [u8]>) -> u32 {
 		todo!()
 	}
 
@@ -198,6 +198,10 @@ impl HostFn for HostFnImpl {
 	}
 
 	fn call_runtime(call: &[u8]) -> Result {
+		todo!()
+	}
+
+	fn debug_message(str: &[u8]) -> Result {
 		todo!()
 	}
 
@@ -279,7 +283,7 @@ impl HostFn for HostFnImpl {
 		todo!()
 	}
 
-	fn xcm_send(dest: &[u8], msg: &[u8], output: &mut &mut [u8]) -> Result {
+	fn xcm_send(dest: &[u8], msg: &[u8], output: &mut [u8; 32]) -> Result {
 		todo!()
 	}
 }

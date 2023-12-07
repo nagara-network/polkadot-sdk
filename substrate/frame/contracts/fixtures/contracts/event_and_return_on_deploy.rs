@@ -15,31 +15,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! This calls another contract as passed as its account id.
 #![no_std]
 #![no_main]
 
-use common::input;
+extern crate common;
 use uapi::{HostFn, HostFnImpl as api};
 
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
-pub extern "C" fn deploy() {}
+pub extern "C" fn deploy() {
+	let buffer = [1u8, 2, 3, 4];
+	api::deposit_event(&[0u8; 0], &buffer);
+	api::return_value(uapi::ReturnFlags::empty(), &buffer);
+}
 
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(callee_input: [u8; 4], callee_addr: [u8; 32],);
-	let value = 0u64.to_le_bytes();
-
-	// Call the callee
-	api::call_v1(
-		uapi::CallFlags::empty(),
-		callee_addr,
-		0u64, // How much gas to devote for the execution. 0 = all.
-		&value,
-		&callee_input,
-		None,
-	)
-	.unwrap();
+	unreachable!()
 }

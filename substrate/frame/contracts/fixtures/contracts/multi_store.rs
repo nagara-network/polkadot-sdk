@@ -15,7 +15,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! This calls another contract as passed as its account id.
+//! Does two stores to two seperate storage items
 #![no_std]
 #![no_main]
 
@@ -29,17 +29,12 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(callee_input: [u8; 4], callee_addr: [u8; 32],);
-	let value = 0u64.to_le_bytes();
+	input!(size1: u32, size2: u32, );
 
-	// Call the callee
-	api::call_v1(
-		uapi::CallFlags::empty(),
-		callee_addr,
-		0u64, // How much gas to devote for the execution. 0 = all.
-		&value,
-		&callee_input,
-		None,
-	)
-	.unwrap();
+	let buffer = [0u8; 16 * 1024];
+
+	// place a values in storage sizes are specified in the input buffer
+	// we don't care about the contents of the storage item
+	api::set_storage(&[1u8; 32], &buffer[0..size1 as _]);
+	api::set_storage(&[2u8; 32], &buffer[0..size2 as _]);
 }

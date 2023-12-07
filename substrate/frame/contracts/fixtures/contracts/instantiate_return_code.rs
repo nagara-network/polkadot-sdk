@@ -15,7 +15,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! This calls another contract as passed as its account id.
 #![no_std]
 #![no_main]
 
@@ -29,17 +28,22 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(callee_input: [u8; 4], callee_addr: [u8; 32],);
-	let value = 0u64.to_le_bytes();
+	input!(buffer, 36, code_hash: [u8; 32],);
+	let value = 10_000u64.to_le_bytes();
+	let input = &buffer[32..];
+	let salt = [0u8; 0];
 
-	// Call the callee
-	api::call_v1(
-		uapi::CallFlags::empty(),
-		callee_addr,
-		0u64, // How much gas to devote for the execution. 0 = all.
-		&value,
-		&callee_input,
-		None,
-	)
-	.unwrap();
+	#[allow(deprecated)]
+	let err_code = match api::instantiate_v2(
+		&code_hash, 0u64, // How much ref_time weight to devote for the execution. 0 = all.
+		0u64, // How much proof_size weight to devote for the execution. 0 = all.
+		None, // No deposit limit.
+		&value, &input, None, None, &salt,
+	) {
+		Ok(_) => 0u32,
+		Err(code) => code as u32,
+	};
+
+	// exit with success and take transfer return code to the output buffer
+	api::return_value(uapi::ReturnFlags::empty(), &err_code.to_le_bytes());
 }
