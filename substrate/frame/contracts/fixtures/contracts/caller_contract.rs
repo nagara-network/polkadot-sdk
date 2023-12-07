@@ -75,8 +75,8 @@ pub extern "C" fn call() {
 	assert!(matches!(res, Err(ReturnErrorCode::CalleeTrapped)));
 
 	// Deploy the contract successfully.
-	let mut address = [0u8; 32];
-	let callee = &mut address[..];
+	let mut callee = [0u8; 32];
+	let callee = &mut callee[..];
 
 	#[allow(deprecated)]
 	api::instantiate_v2(

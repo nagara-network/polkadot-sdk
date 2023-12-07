@@ -37,19 +37,27 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
 /// Example:
 ///
 /// ```
-/// // data layout is:
+/// // Data layout is:
 /// // [0, 4)    var1 decoded as u32
 /// // [4, 36)   var2 decoded as a [u8] slice
-/// // [36, 37): var3 decoded as a u8
-/// input$!(var1: u32, var2: [u8; 32], var3: u8, )
-
-/// // size can be specified as well:
+/// // [36, 37)  var3 decoded as a u8
+/// input$!(
+///   var1 => u32,
+///   var2 => [u8; 32],
+///   var3 => u8,
+/// )
+///
+/// // Input size can be specified as well:
 /// // [0, 4)    var4 decoded as u32
 /// // [4, ..)   var5 decoded as a [u8] slice
-/// input$!(512, var6: u32, var7: [u8])
-
-/// // input buffer can returned as well when specified as the first argument:
-/// input$!(input, var8: u32)
+/// input$!(
+/// 	512,
+/// 	var6 => u32,
+/// 	var7 => [u8],
+/// )
+///
+/// // Input buffer var can be specified as the first argument:
+/// input$!(input, var8 => u32, )
 /// ```
 #[macro_export]
 macro_rules! input {
@@ -57,6 +65,7 @@ macro_rules! input {
     (@size $size:expr, ) => { $size };
 
     // Match a u8 variable.
+	// e.g input!(var1 => u8, );
     (@inner $input:expr, $cursor:expr, $var:ident => u8, $($rest:tt)*) => {
         let $var = $input[$cursor];
         input!(@inner $input, $cursor + 1, $($rest)*);
@@ -68,6 +77,7 @@ macro_rules! input {
     };
 
     // Match a u64 variable.
+	// e.g input!(var1 => u64, );
     (@inner $input:expr, $cursor:expr, $var:ident => u64, $($rest:tt)*) => {
         let $var = u64::from_le_bytes($input[$cursor..$cursor + 8].try_into().unwrap());
         input!(@inner $input, $cursor + 8, $($rest)*);
@@ -79,6 +89,7 @@ macro_rules! input {
     };
 
     // Match a u32 variable.
+	// e.g input!(var1 => u32, );
     (@inner $input:expr, $cursor:expr, $var:ident => u32, $($rest:tt)*) => {
         let $var = u32::from_le_bytes($input[$cursor..$cursor + 4].try_into().unwrap());
         input!(@inner $input, $cursor + 4, $($rest)*); // Continue with the rest
@@ -90,11 +101,13 @@ macro_rules! input {
     };
 
     // Match a u8 slice with the remaining bytes.
+	// e.g input!(512, var1 => [u8; 32], var2 => [u8], );
     (@inner $input:expr, $cursor:expr, $var:ident => [u8],) => {
         let $var = &$input[$cursor..];
     };
 
     // Match a u8 slice of the given size.
+	// e.g input!(var1 => [u8; 32], );
     (@inner $input:expr, $cursor:expr, $var:ident => [u8; $n:expr], $($rest:tt)*) => {
         let $var = &$input[$cursor..$cursor+$n];
         input!(@inner $input, $cursor + $n, $($rest)*); // Continue with the rest
@@ -105,7 +118,8 @@ macro_rules! input {
         input!(@size $size + $n, $($rest)*)
     };
 
-    // Entry point, with the size of the input buffer specified first.
+    // Entry point, with the buffer and it's size specified first.
+	// e.g input!(buffer, 512, var1 => u32, var2 => [u8], );
     ($buffer:ident, $size:expr, $($rest:tt)*) => {
         let mut $buffer = [0u8; $size];
         let $buffer = &mut &mut $buffer[..];
@@ -114,17 +128,19 @@ macro_rules! input {
     };
 
     // Entry point, with the name of the buffer specified and size of the input buffer computed.
+	// e.g input!(buffer, var1 => u32, var2 => u64, );
     ($buffer: ident, $($rest:tt)*) => {
         input!($buffer, input!(@size 0, $($rest)*), $($rest)*);
     };
 
     // Entry point, with the size of the input buffer computed.
+	// e.g input!(var1 => u32, var2 => u64, );
     ($($rest:tt)*) => {
         input!(buffer, $($rest)*);
     };
 }
 
-/// Utility macro to invoke a host function that expect a `output: &mut &mut [u8]` as last argument
+/// Utility macro to invoke a host function that expect a `output: &mut &mut [u8]` as last argument.
 ///
 /// Example:
 /// ```
