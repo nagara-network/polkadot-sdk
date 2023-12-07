@@ -57,51 +57,51 @@ macro_rules! input {
     (@size $size:expr, ) => { $size };
 
     // Match a u8 variable.
-    (@inner $input:expr, $cursor:expr, $var:ident: u8, $($rest:tt)*) => {
+    (@inner $input:expr, $cursor:expr, $var:ident => u8, $($rest:tt)*) => {
         let $var = $input[$cursor];
         input!(@inner $input, $cursor + 1, $($rest)*);
     };
 
     // Size of u8 variable.
-    (@size $size:expr, $var:ident: u8, $($rest:tt)*) => {
+    (@size $size:expr, $var:ident => u8, $($rest:tt)*) => {
         input!(@size $size + 1, $($rest)*)
     };
 
     // Match a u64 variable.
-    (@inner $input:expr, $cursor:expr, $var:ident: u64, $($rest:tt)*) => {
+    (@inner $input:expr, $cursor:expr, $var:ident => u64, $($rest:tt)*) => {
         let $var = u64::from_le_bytes($input[$cursor..$cursor + 8].try_into().unwrap());
         input!(@inner $input, $cursor + 8, $($rest)*);
     };
 
     // Size of u64 variable.
-    (@size $size:expr, $var:ident: u64, $($rest:tt)*) => {
+    (@size $size:expr, $var:ident => u64, $($rest:tt)*) => {
         input!(@size $size + 8, $($rest)*)
     };
 
     // Match a u32 variable.
-    (@inner $input:expr, $cursor:expr, $var:ident: u32, $($rest:tt)*) => {
+    (@inner $input:expr, $cursor:expr, $var:ident => u32, $($rest:tt)*) => {
         let $var = u32::from_le_bytes($input[$cursor..$cursor + 4].try_into().unwrap());
         input!(@inner $input, $cursor + 4, $($rest)*); // Continue with the rest
     };
 
     // Size of u32 variable.
-    (@size $size:expr, $var:ident: u32, $($rest:tt)*) => {
+    (@size $size:expr, $var:ident => u32, $($rest:tt)*) => {
         input!(@size $size + 4, $($rest)*)
     };
 
     // Match a u8 slice with the remaining bytes.
-    (@inner $input:expr, $cursor:expr, $var:ident: [u8],) => {
+    (@inner $input:expr, $cursor:expr, $var:ident => [u8],) => {
         let $var = &$input[$cursor..];
     };
 
     // Match a u8 slice of the given size.
-    (@inner $input:expr, $cursor:expr, $var:ident: [u8; $n:expr], $($rest:tt)*) => {
+    (@inner $input:expr, $cursor:expr, $var:ident => [u8; $n:expr], $($rest:tt)*) => {
         let $var = &$input[$cursor..$cursor+$n];
         input!(@inner $input, $cursor + $n, $($rest)*); // Continue with the rest
     };
 
     // Size of a u8 slice.
-    (@size $size:expr, $var:ident: [u8; $n:expr], $($rest:tt)*) => {
+    (@size $size:expr, $var:ident => [u8; $n:expr], $($rest:tt)*) => {
         input!(@size $size + $n, $($rest)*)
     };
 

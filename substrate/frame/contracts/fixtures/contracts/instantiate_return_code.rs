@@ -28,7 +28,7 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(buffer, 36, code_hash: [u8; 32],);
+	input!(buffer, 36, code_hash => [u8; 32],);
 	let value = 10_000u64.to_le_bytes();
 	let input = &buffer[32..];
 	let salt = [0u8; 0];

@@ -28,7 +28,11 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(512, dest: [u8; 3], msg: [u8],);
+	input!(
+		512,
+		dest => [u8; 3],
+		msg => [u8],
+	);
 
 	let mut message_id = [0u8; 32];
 

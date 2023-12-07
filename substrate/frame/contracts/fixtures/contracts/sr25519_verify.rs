@@ -28,7 +28,11 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(signature: [u8; 64], pub_key: [u8; 32], msg: [u8; 11], );
+	input!(
+		signature => [u8; 64],
+		pub_key => [u8; 32],
+		msg => [u8; 11],
+	);
 
 	let exit_status = match api::sr25519_verify(
 		&signature.try_into().unwrap(),

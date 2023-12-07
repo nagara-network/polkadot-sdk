@@ -28,7 +28,10 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(signature: [u8; 65], hash: [u8; 32],);
+	input!(
+		signature => [u8; 65],
+		hash => [u8; 32],
+	);
 
 	let mut output = [0u8; 33];
 	api::ecdsa_recover(

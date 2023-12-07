@@ -32,8 +32,12 @@ pub extern "C" fn deploy() {
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(input, 128, exit_status: [u8; 4], output: [u8], );
-	let exit_status = uapi::ReturnFlags::from_bits(exit_status[0] as u32).unwrap();
+	input!(
+		input, 128,
+		exit_status => [u8; 4],
+		output => [u8],
+	);
 
+	let exit_status = uapi::ReturnFlags::from_bits(exit_status[0] as u32).unwrap();
 	api::return_value(exit_status, output);
 }

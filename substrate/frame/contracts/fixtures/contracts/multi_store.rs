@@ -29,7 +29,10 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(size1: u32, size2: u32, );
+	input!(
+		size1 => u32,
+		size2 => u32,
+	);
 
 	let buffer = [0u8; 16 * 1024];
 

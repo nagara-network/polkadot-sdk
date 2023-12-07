@@ -28,7 +28,11 @@ const ALICE: [u8; 32] = [1u8; 32];
 /// Load input data and perform the action specified by the input.
 /// If `delegate_call` is true, then delegate call into the contract.
 fn load_input(delegate_call: bool) {
-	input!(action: u32, code_hash: [u8; 32],);
+	input!(
+		action => u32,
+		code_hash => [u8; 32],
+	);
+
 	match action {
 		// 1 = Add delegate dependency
 		1 => {

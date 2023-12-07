@@ -30,7 +30,12 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(input, func_id1: u32, func_id2: u32, stop_recurse: u8,);
+	input!(
+		input,
+		func_id1 => u32,
+		func_id2 => u32,
+		stop_recurse => u8,
+	);
 
 	api::call_chain_extension(func_id1, &input, None);
 	api::call_chain_extension(func_id2, &input, None);

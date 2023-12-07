@@ -52,7 +52,11 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(256, chosen_hash_fn: u8, input: [u8], );
+	input!(
+		256,
+		chosen_hash_fn => u8,
+		input => [u8],
+	);
 
 	match chosen_hash_fn {
 		1 => {

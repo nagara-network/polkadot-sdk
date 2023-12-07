@@ -31,7 +31,12 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(100, callee_addr: [u8; 32], input: [u8], );
+	input!(
+		100,
+		callee_addr => [u8; 32],
+		input => [u8],
+	);
+
 	let value = 100u64.to_le_bytes();
 
 	// Call the callee

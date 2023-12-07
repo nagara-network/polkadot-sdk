@@ -29,7 +29,13 @@ pub extern "C" fn deploy() {}
 #[no_mangle]
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
-	input!(buffer, input: [u8; 4], callee: [u8; 32], deposit_limit: [u8; 8], );
+	input!(
+		buffer,
+		input => [u8; 4],
+		callee => [u8; 32],
+		deposit_limit => [u8; 8],
+	);
+
 	let value = 0u64.to_le_bytes();
 
 	// create 4 byte of storage before calling
