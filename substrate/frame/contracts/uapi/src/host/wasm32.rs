@@ -131,11 +131,7 @@ mod sys {
 
 		pub fn set_code_hash(code_hash_ptr: *const u8) -> ReturnCode;
 
-		pub fn set_storage(
-			key_ptr: *const u8,
-			value_ptr: *const u8,
-			value_len: u32,
-		);
+		pub fn set_storage(key_ptr: *const u8, value_ptr: *const u8, value_len: u32);
 
 		pub fn sr25519_verify(
 			signature_ptr: *const u8,
@@ -320,7 +316,6 @@ macro_rules! impl_hash_fn {
 		}
 	};
 }
-
 
 impl HostFn for HostFnImpl {
 	fn instantiate_v1(
@@ -558,18 +553,12 @@ impl HostFn for HostFnImpl {
 	}
 
 	fn set_storage(key: &[u8], value: &[u8]) {
-		unsafe {
-			sys::set_storage(key.as_ptr(), value.as_ptr(), value.len() as u32)
-		};
+		unsafe { sys::set_storage(key.as_ptr(), value.as_ptr(), value.len() as u32) };
 	}
 
 	fn set_storage_v1(key: &[u8], encoded_value: &[u8]) -> Option<u32> {
 		let ret_code = unsafe {
-			sys::v1::set_storage(
-				key.as_ptr(),
-				encoded_value.as_ptr(),
-				encoded_value.len() as u32,
-			)
+			sys::v1::set_storage(key.as_ptr(), encoded_value.as_ptr(), encoded_value.len() as u32)
 		};
 		ret_code.into()
 	}
@@ -597,15 +586,8 @@ impl HostFn for HostFnImpl {
 
 	fn get_storage(key: &[u8], output: &mut &mut [u8]) -> Result {
 		let mut output_len = output.len() as u32;
-		let ret_code = {
-			unsafe {
-				sys::get_storage(
-					key.as_ptr(),
-					output.as_mut_ptr(),
-					&mut output_len,
-				)
-			}
-		};
+		let ret_code =
+			{ unsafe { sys::get_storage(key.as_ptr(), output.as_mut_ptr(), &mut output_len) } };
 		extract_from_slice(output, output_len as usize);
 		ret_code.into()
 	}

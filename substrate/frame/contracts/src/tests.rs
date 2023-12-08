@@ -178,7 +178,7 @@ parameter_types! {
 pub struct TestExtension {
 	enabled: bool,
 	last_seen_buffer: Vec<u8>,
-	last_seen_inputs: (u32, u32, u32, u32),
+	last_seen_input_len: u32,
 }
 
 #[derive(Default)]
@@ -201,15 +201,14 @@ impl TestExtension {
 		TestExtensionTestValue::get().last_seen_buffer.clone()
 	}
 
-	#[allow(dead_code)]
-	fn last_seen_inputs() -> (u32, u32, u32, u32) {
-		TestExtensionTestValue::get().last_seen_inputs
+	fn last_seen_input_len() -> u32 {
+		TestExtensionTestValue::get().last_seen_input_len
 	}
 }
 
 impl Default for TestExtension {
 	fn default() -> Self {
-		Self { enabled: true, last_seen_buffer: vec![], last_seen_inputs: (0, 0, 0, 0) }
+		Self { enabled: true, last_seen_buffer: vec![], last_seen_input_len: 0 }
 	}
 }
 
@@ -232,9 +231,7 @@ impl ChainExtension<Test> for TestExtension {
 			},
 			1 => {
 				let env = env.only_in();
-				TestExtensionTestValue::mutate(|e| {
-					e.last_seen_inputs = (env.val0(), env.val1(), env.val2(), env.val3())
-				});
+				TestExtensionTestValue::mutate(|e| e.last_seen_input_len = env.input_len());
 				Ok(RetVal::Converging(id))
 			},
 			2 => {
@@ -2155,8 +2152,7 @@ fn chain_extension_works() {
 		)
 		.result
 		.unwrap();
-		// those values passed in the fixture
-		// assert_eq!(TestExtension::last_seen_inputs(), (4, 4, 16, 12));
+		assert_eq!(TestExtension::last_seen_input_len(), 4);
 
 		// 2 = charge some extra weight (amount supplied in the fifth byte)
 		let result = Contracts::bare_call(
