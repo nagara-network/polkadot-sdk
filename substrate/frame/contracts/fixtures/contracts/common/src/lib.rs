@@ -155,13 +155,6 @@ macro_rules! input {
 /// ```
 #[macro_export]
 macro_rules! output {
-    ($output: ident, $buffer: expr, deprecated, $host_fn:path, $($arg:expr),*) => {
-        let mut $output = $buffer;
-        let $output = &mut &mut $output[..];
-        #[allow(deprecated)]
-        $host_fn($($arg,)* $output);
-    };
-
     ($output: ident, $buffer: expr, $host_fn:path, $($arg:expr),*) => {
         let mut $output = $buffer;
         let $output = &mut &mut $output[..];
