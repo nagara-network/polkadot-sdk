@@ -29,16 +29,20 @@ pub extern "C" fn deploy() {}
 #[polkavm_derive::polkavm_export]
 pub extern "C" fn call() {
 	input!(buffer, 36, code_hash => [u8; 32],);
-	let value = 10_000u64.to_le_bytes();
 	let input = &buffer[32..];
-	let salt = [0u8; 0];
 
 	#[allow(deprecated)]
 	let err_code = match api::instantiate_v2(
-		&code_hash, 0u64, // How much ref_time weight to devote for the execution. 0 = all.
-		0u64, // How much proof_size weight to devote for the execution. 0 = all.
-		None, // No deposit limit.
-		&value, &input, None, None, &salt,
+		&code_hash,
+		0u64, // How much ref_time weight to devote for the execution. 0 = all.
+		0u64, /* How much proof_size weight to devote for the execution. 0 =
+		       * all. */
+		None,                     // No deposit limit.
+		&10_000u64.to_le_bytes(), // Value to transfer.
+		&input,
+		None,
+		None,
+		&[0u8; 0], // Empty salt.
 	) {
 		Ok(_) => 0u32,
 		Err(code) => code as u32,

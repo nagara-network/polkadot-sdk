@@ -37,14 +37,12 @@ pub extern "C" fn call() {
 		input => [u8],
 	);
 
-	let value = 100u64.to_le_bytes();
-
 	// Call the callee
 	let err_code = match api::call_v1(
 		uapi::CallFlags::empty(),
 		callee_addr,
-		0u64, // How much gas to devote for the execution. 0 = all.
-		&value,
+		0u64,                  // How much gas to devote for the execution. 0 = all.
+		&100u64.to_le_bytes(), // value transferred to the contract.
 		&input,
 		None,
 	) {
