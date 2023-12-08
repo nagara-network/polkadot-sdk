@@ -141,9 +141,6 @@ macro_rules! input {
 ///
 /// // call `api::get_storage` and store the output in `address`
 /// output!(address, [0u8; 32], api::get_storage, &[1u8; 32]);
-
-/// // call a deprecated API
-/// output!(address, [0u8; 32], deprecated, api::get_storage, &[1u8; 32]);
 /// ```
 #[macro_export]
 macro_rules! output {
