@@ -31,19 +31,19 @@ pub extern "C" fn call() {
 	let mut key = [0u8; 32];
 	key[0] = 1u8;
 
-	// place a value in storage
+	// Place a value in storage.
 	let mut value = [0u8; 32];
 	let value = &mut &mut value[..];
 	value[0] = 1u8;
 	api::set_storage(&key, &value);
 
-	// assert that `value_transferred` is equal to the value
-	// passed to the `caller` contract: 1337
+	// Assert that `value_transferred` is equal to the value
+	// passed to the `caller` contract: 1337.
 	output!(value_transferred, [0u8; 8], api::value_transferred,);
 	let value_transferred = u64::from_le_bytes(value_transferred[..].try_into().unwrap());
 	assert_eq!(value_transferred, 1337);
 
-	// assert that ALICE is the caller of the contract
+	// Assert that ALICE is the caller of the contract.
 	output!(caller, [0u8; 32], api::caller,);
 	assert_eq!(&caller[..], &[1u8; 32]);
 }

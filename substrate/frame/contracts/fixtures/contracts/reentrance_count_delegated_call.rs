@@ -40,7 +40,7 @@ pub extern "C" fn call() {
 	#[allow(deprecated)]
 	let reentrance_count = api::reentrance_count();
 
-	// reentrance count stays 0
+	// Reentrance count stays 0.
 	assert_eq!(reentrance_count, 0);
 
 	// Re-enter 5 times in a row and assert that the reentrant counter works as expected.

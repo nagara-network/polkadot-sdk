@@ -33,6 +33,6 @@ pub extern "C" fn call() {
 		Err(code) => code as u32,
 	};
 
-	// exit with success and take transfer return code to the output buffer
+	// Exit with success and take transfer return code to the output buffer.
 	api::return_value(uapi::ReturnFlags::empty(), &ret_code.to_le_bytes());
 }

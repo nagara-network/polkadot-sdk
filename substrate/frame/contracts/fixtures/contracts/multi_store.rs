@@ -36,8 +36,8 @@ pub extern "C" fn call() {
 
 	let buffer = [0u8; 16 * 1024];
 
-	// place a values in storage sizes are specified in the input buffer
-	// we don't care about the contents of the storage item
+	// Place a values in storage sizes are specified in the input buffer.
+	// We don't care about the contents of the storage item.
 	api::set_storage(&[1u8; 32], &buffer[0..size1 as _]);
 	api::set_storage(&[2u8; 32], &buffer[0..size2 as _]);
 }
