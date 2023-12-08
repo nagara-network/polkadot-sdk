@@ -19,25 +19,25 @@ use crate::ReturnFlags;
 
 /// A macro to implement all Host functions with a signature of `fn(&mut &mut [u8])`.
 macro_rules! impl_wrapper_for {
-    (@impl_fn $( $mod:ident )::*, $suffix:literal, $name:ident) => {
-        paste::paste! {
-            fn [<$name $suffix>](output: &mut &mut [u8]) {
+	(@impl_fn $( $mod:ident )::*, $suffix:literal, $name:ident) => {
+		paste::paste! {
+			fn [<$name $suffix>](output: &mut &mut [u8]) {
 				todo!()
-            }
-        }
-    };
+			}
+		}
+	};
 
-    () => {};
+	() => {};
 
-    (($mod:ident, $suffix:literal) => [$( $name:ident),*], $($tail:tt)*) => {
-        $(impl_wrapper_for!(@impl_fn sys::$mod, $suffix, $name);)*
-        impl_wrapper_for!($($tail)*);
-    };
+	(($mod:ident, $suffix:literal) => [$( $name:ident),*], $($tail:tt)*) => {
+		$(impl_wrapper_for!(@impl_fn sys::$mod, $suffix, $name);)*
+		impl_wrapper_for!($($tail)*);
+	};
 
-    (() =>  [$( $name:ident),*], $($tail:tt)*) => {
-        $(impl_wrapper_for!(@impl_fn sys, "", $name);)*
-        impl_wrapper_for!($($tail)*);
-    };
+	(() =>	[$( $name:ident),*], $($tail:tt)*) => {
+		$(impl_wrapper_for!(@impl_fn sys, "", $name);)*
+		impl_wrapper_for!($($tail)*);
+	};
 }
 
 /// A macro to implement all the hash functions Apis.

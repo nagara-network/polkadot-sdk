@@ -276,28 +276,28 @@ mod sys {
 
 /// A macro to implement all Host functions with a signature of `fn(&mut &mut [u8])`.
 macro_rules! impl_wrapper_for {
-    (@impl_fn $( $mod:ident )::*, $suffix:literal, $name:ident) => {
-        paste::paste! {
-            fn [<$name $suffix>](output: &mut &mut [u8]) {
-                let mut output_len = output.len() as u32;
-                unsafe {
-                    $( $mod )::*::$name(output.as_mut_ptr(), &mut output_len);
-                }
-            }
-        }
-    };
+	(@impl_fn $( $mod:ident )::*, $suffix:literal, $name:ident) => {
+		paste::paste! {
+			fn [<$name $suffix>](output: &mut &mut [u8]) {
+				let mut output_len = output.len() as u32;
+				unsafe {
+					$( $mod )::*::$name(output.as_mut_ptr(), &mut output_len);
+				}
+			}
+		}
+	};
 
-    () => {};
+	() => {};
 
-    (($mod:ident, $suffix:literal) => [$( $name:ident),*], $($tail:tt)*) => {
-        $(impl_wrapper_for!(@impl_fn sys::$mod, $suffix, $name);)*
-        impl_wrapper_for!($($tail)*);
-    };
+	(($mod:ident, $suffix:literal) => [$( $name:ident),*], $($tail:tt)*) => {
+		$(impl_wrapper_for!(@impl_fn sys::$mod, $suffix, $name);)*
+		impl_wrapper_for!($($tail)*);
+	};
 
-    (() =>  [$( $name:ident),*], $($tail:tt)*) => {
-        $(impl_wrapper_for!(@impl_fn sys, "", $name);)*
-        impl_wrapper_for!($($tail)*);
-    };
+	(() =>	[$( $name:ident),*], $($tail:tt)*) => {
+		$(impl_wrapper_for!(@impl_fn sys, "", $name);)*
+		impl_wrapper_for!($($tail)*);
+	};
 }
 
 /// A macro to implement all the hash functions Apis.
