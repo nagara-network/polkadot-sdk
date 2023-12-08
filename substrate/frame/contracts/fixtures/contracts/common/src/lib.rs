@@ -84,7 +84,7 @@ macro_rules! input {
 	// e.g input!(var1 => u32, );
 	(@inner $input:expr, $cursor:expr, $var:ident => u32, $($rest:tt)*) => {
 		let $var = u32::from_le_bytes($input[$cursor..$cursor + 4].try_into().unwrap());
-		input!(@inner $input, $cursor + 4, $($rest)*); // Continue with the rest
+		input!(@inner $input, $cursor + 4, $($rest)*);
 	};
 
 	// Size of u32 variable.
@@ -102,7 +102,7 @@ macro_rules! input {
 	// e.g input!(var1 => [u8; 32], );
 	(@inner $input:expr, $cursor:expr, $var:ident => [u8; $n:expr], $($rest:tt)*) => {
 		let $var = &$input[$cursor..$cursor+$n];
-		input!(@inner $input, $cursor + $n, $($rest)*); // Continue with the rest
+		input!(@inner $input, $cursor + $n, $($rest)*);
 	};
 
 	// Size of a u8 slice.
