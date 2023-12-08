@@ -37,27 +37,19 @@ fn panic(_info: &core::panic::PanicInfo) -> ! {
 /// Example:
 ///
 /// ```
-/// // Data layout is:
-/// // [0, 4)	 var1 decoded as u32
-/// // [4, 36)	 var2 decoded as a [u8] slice
-/// // [36, 37)  var3 decoded as a u8
 /// input$!(
-/// 	var1 => u32,
-/// 	var2 => [u8; 32],
-/// 	var3 => u8,
+/// 	var1 => u32,      // [0, 4)	  var1 decoded as u32
+/// 	var2 => [u8; 32], // [4, 36)  var2 decoded as a [u8] slice
+/// 	var3 => u8,       // [36, 37) var3 decoded as a u8
 /// );
 ///
-/// // Input size can be specified as well:
-/// // [0, 4)	 var4 decoded as u32
-/// // [4, ..)	 var5 decoded as a [u8] slice
+/// // Input and size can be specified as well:
 /// input$!(
-/// 	512,
-/// 	var6 => u32,
-/// 	var7 => [u8],
+///     input, // input buffer (optional)
+/// 	512,   // input size (optional)
+/// 	var6 => u32,  [0, 4)  var4 decoded as u32
+/// 	var7 => [u8], [4, ..) var5 decoded as a [u8] slice
 /// );
-///
-/// // Input buffer var can be specified as the first argument:
-/// input$!(input, var8 => u32, );
 /// ```
 #[macro_export]
 macro_rules! input {
