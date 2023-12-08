@@ -275,10 +275,28 @@ mod sys {
 }
 
 /// A macro to implement all Host functions with a signature of `fn(&mut &mut [u8])`.
+///
+/// Example:
+/// ```nocompile
+// impl_wrapper_for! {
+//     () => [gas_left],
+//     (v1) => [gas_left],
+// }
+// ```
+//
+// Expands to:
+// ```nocompile
+// fn gas_left(output: &mut &mut [u8]) {
+//     unsafe { sys::gas_left(...); }
+// }
+// fn gas_left_v1(output: &mut &mut [u8]) {
+//     unsafe { sys::v1::gas_left(...); }
+// }
+// ```
 macro_rules! impl_wrapper_for {
-	(@impl_fn $( $mod:ident )::*, $suffix:literal, $name:ident) => {
+	(@impl_fn $( $mod:ident )::*, $suffix_sep: literal, $suffix:tt, $name:ident) => {
 		paste::paste! {
-			fn [<$name $suffix>](output: &mut &mut [u8]) {
+			fn [<$name $suffix_sep $suffix>](output: &mut &mut [u8]) {
 				let mut output_len = output.len() as u32;
 				unsafe {
 					$( $mod )::*::$name(output.as_mut_ptr(), &mut output_len);
@@ -289,13 +307,13 @@ macro_rules! impl_wrapper_for {
 
 	() => {};
 
-	(($mod:ident, $suffix:literal) => [$( $name:ident),*], $($tail:tt)*) => {
-		$(impl_wrapper_for!(@impl_fn sys::$mod, $suffix, $name);)*
+	(($mod:ident) => [$( $name:ident),*], $($tail:tt)*) => {
+		$(impl_wrapper_for!(@impl_fn sys::$mod, "_", $mod, $name);)*
 		impl_wrapper_for!($($tail)*);
 	};
 
 	(() =>	[$( $name:ident),*], $($tail:tt)*) => {
-		$(impl_wrapper_for!(@impl_fn sys, "", $name);)*
+		$(impl_wrapper_for!(@impl_fn sys, "", "", $name);)*
 		impl_wrapper_for!($($tail)*);
 	};
 }
@@ -686,7 +704,7 @@ impl HostFn for HostFnImpl {
 
 	impl_wrapper_for! {
 		() => [caller, block_number, address, balance, gas_left, value_transferred, now, minimum_balance],
-		(v1, "_v1") => [gas_left],
+		(v1) => [gas_left],
 	}
 
 	fn weight_to_fee(gas: u64, output: &mut &mut [u8]) {
