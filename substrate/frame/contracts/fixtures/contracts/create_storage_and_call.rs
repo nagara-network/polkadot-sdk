@@ -36,8 +36,6 @@ pub extern "C" fn call() {
 		deposit_limit => [u8; 8],
 	);
 
-	let value = 0u64.to_le_bytes();
-
 	// create 4 byte of storage before calling
 	api::set_storage(&buffer, &[1u8; 4]);
 
@@ -49,7 +47,7 @@ pub extern "C" fn call() {
 		0u64, // How much ref_time weight to devote for the execution. 0 = all.
 		0u64, // How much proof_size weight to devote for the execution. 0 = all.
 		Some(deposit_limit),
-		&value,
+		&0u64.to_le_bytes(), // value transferred to the contract.
 		&input,
 		None,
 	)

@@ -50,12 +50,11 @@ pub extern "C" fn call() {
 		output!(addr, [0u8; 32], api::address,);
 
 		// call self
-		let value = 0u64.to_le_bytes();
 		api::call_v1(
 			uapi::CallFlags::ALLOW_REENTRY,
 			&addr,
-			0u64, // How much gas to devote for the execution. 0 = all.
-			&value,
+			0u64,                // How much gas to devote for the execution. 0 = all.
+			&0u64.to_le_bytes(), // value transferred to the contract.
 			&input,
 			None,
 		)

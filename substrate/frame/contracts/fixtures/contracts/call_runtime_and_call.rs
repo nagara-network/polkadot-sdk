@@ -39,12 +39,11 @@ pub extern "C" fn call() {
 	api::call_runtime(&call).unwrap();
 
 	// Call the callee
-	let value = 0u64.to_le_bytes();
 	api::call_v1(
 		uapi::CallFlags::empty(),
 		&callee_addr,
-		0u64, // How much gas to devote for the execution. 0 = all.
-		&value,
+		0u64,                // How much gas to devote for the execution. 0 = all.
+		&0u64.to_le_bytes(), // value transferred to the contract.
 		&callee_input,
 		None,
 	)

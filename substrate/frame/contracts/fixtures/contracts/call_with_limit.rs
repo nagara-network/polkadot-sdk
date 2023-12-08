@@ -36,18 +36,15 @@ pub extern "C" fn call() {
 		proof_size => u64,
 	);
 
-	let value = 0u64.to_le_bytes();
-	let callee_input = [0u8; 0];
-
 	#[allow(deprecated)]
 	api::call_v2(
 		uapi::CallFlags::empty(),
 		callee_addr,
 		ref_time,
 		proof_size,
-		None,
-		&value,
-		&callee_input,
+		None,                // No deposit limit.
+		&0u64.to_le_bytes(), // value transferred to the contract.
+		&[0u8; 0],           // input data.
 		None,
 	)
 	.unwrap();

@@ -41,13 +41,12 @@ pub extern "C" fn call() {
 	// Re-enter 5 times in a row and assert that the reentrant counter works as expected.
 	if expected_reentrance_count != 5 {
 		let count = (expected_reentrance_count + 1).to_le_bytes();
-		let value = 0u64.to_le_bytes();
 
 		api::call_v1(
 			uapi::CallFlags::ALLOW_REENTRY,
 			&addr,
-			0u64, // How much gas to devote for the execution. 0 = all.
-			&value,
+			0u64,                // How much gas to devote for the execution. 0 = all.
+			&0u64.to_le_bytes(), // value transferred to the contract.
 			&count,
 			None,
 		)
