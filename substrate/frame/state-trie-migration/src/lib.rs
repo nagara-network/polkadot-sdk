@@ -80,10 +80,8 @@ pub mod pallet {
 		ensure,
 		pallet_prelude::*,
 		traits::{
-			fungible::{
-				hold::Balanced as FunBalanced, Inspect as FunInspect,
-				InspectHold as FunInspectHold, Mutate as FunMutate, MutateHold as FunMutateHold,
-			},
+			fungible::{hold::Balanced, Inspect, InspectHold, Mutate, MutateHold},
+			tokens::{Fortitude, Precision},
 			Get,
 		},
 	};
@@ -98,7 +96,7 @@ pub mod pallet {
 	use sp_std::{ops::Deref, prelude::*};
 
 	pub(crate) type BalanceOf<T> =
-		<<T as Config>::Currency as FunInspect<<T as frame_system::Config>::AccountId>>::Balance;
+		<<T as Config>::Currency as Inspect<<T as frame_system::Config>::AccountId>>::Balance;
 
 	/// The progress of either the top or child keys.
 	#[derive(
@@ -497,10 +495,10 @@ pub mod pallet {
 
 		/// The currency provider type.
 		#[pallet::no_default]
-		type Currency: FunInspectHold<Self::AccountId>
-			+ FunMutate<Self::AccountId>
-			+ FunMutateHold<Self::AccountId, Reason = Self::RuntimeHoldReason>
-			+ FunBalanced<Self::AccountId>;
+		type Currency: InspectHold<Self::AccountId>
+			+ Mutate<Self::AccountId>
+			+ MutateHold<Self::AccountId, Reason = Self::RuntimeHoldReason>
+			+ Balanced<Self::AccountId>;
 
 		/// The overarching runtime hold reason.
 		#[pallet::no_default_bounds]
@@ -677,10 +675,14 @@ pub mod pallet {
 			if real_size_upper < task.dyn_size {
 				T::Currency::hold(&HoldReason::SlashForContinueMigrate.into(), &who, deposit)?;
 				// let the imbalance burn.
-				let (_imbalance, _remainder) =
-					T::Currency::slash(&HoldReason::SlashForContinueMigrate.into(), &who, deposit);
+				let _burned = T::Currency::burn_all_held(
+					&HoldReason::SlashForContinueMigrate.into(),
+					&who,
+					Precision::BestEffort,
+					Fortitude::Force,
+				)?;
+				debug_assert!(deposit.saturating_sub(_burned).is_zero());
 				Self::deposit_event(Event::<T>::Slashed { who, amount: deposit });
-				debug_assert!(_remainder.is_zero());
 				return Ok(().into())
 			}
 
@@ -742,10 +744,14 @@ pub mod pallet {
 
 			if dyn_size > witness_size {
 				T::Currency::hold(&HoldReason::SlashForMigrateCustomTop.into(), &who, deposit)?;
-				let (_imbalance, _remainder) =
-					T::Currency::slash(&HoldReason::SlashForMigrateCustomTop.into(), &who, deposit);
+				let _burned = T::Currency::burn_all_held(
+					&HoldReason::SlashForMigrateCustomTop.into(),
+					&who,
+					Precision::BestEffort,
+					Fortitude::Force,
+				)?;
+				debug_assert!(deposit.saturating_sub(_burned).is_zero());
 				Self::deposit_event(Event::<T>::Slashed { who, amount: deposit });
-				debug_assert!(_remainder.is_zero());
 				Ok(().into())
 			} else {
 				Self::deposit_event(Event::<T>::Migrated {
@@ -811,12 +817,13 @@ pub mod pallet {
 
 			if dyn_size != total_size {
 				T::Currency::hold(&HoldReason::SlashForMigrateCustomChild.into(), &who, deposit)?;
-				let (_imbalance, _remainder) = T::Currency::slash(
+				let _burned = T::Currency::burn_all_held(
 					&HoldReason::SlashForMigrateCustomChild.into(),
 					&who,
-					deposit,
-				);
-				debug_assert!(_remainder.is_zero());
+					Precision::BestEffort,
+					Fortitude::Force,
+				)?;
+				debug_assert!(deposit.saturating_sub(_burned).is_zero());
 				Self::deposit_event(Event::<T>::Slashed { who, amount: deposit });
 				Ok(PostDispatchInfo {
 					actual_weight: Some(T::WeightInfo::migrate_custom_child_fail()),
@@ -967,7 +974,7 @@ pub mod pallet {
 mod benchmarks {
 	use super::{pallet::Pallet as StateTrieMigration, *};
 	use frame_support::traits::{
-		fungible::{Inspect as FunInspect, Mutate as FunMutate},
+		fungible::{Inspect, Mutate},
 		Get,
 	};
 	use sp_runtime::traits::Saturating;
@@ -1306,6 +1313,7 @@ mod mock {
 #[cfg(test)]
 mod test {
 	use super::{mock::*, *};
+	use frame_support::assert_ok;
 	use sp_runtime::{bounded_vec, traits::Bounded, StateVersion};
 
 	#[test]
@@ -1535,10 +1543,9 @@ mod test {
 			while !MigrationProcess::<Test>::get().finished() {
 				// first we compute the task to get the accurate consumption.
 				let mut task = StateTrieMigration::migration_process();
-				let result = task.migrate_until_exhaustion(
+				assert_ok!(task.migrate_until_exhaustion(
 					StateTrieMigration::signed_migration_max_limits().unwrap(),
-				);
-				assert!(result.is_ok());
+				));
 
 				frame_support::assert_ok!(StateTrieMigration::continue_migrate(
 					RuntimeOrigin::signed(1),
@@ -1549,6 +1556,7 @@ mod test {
 
 				// no funds should remain reserved.
 				assert_eq!(Balances::reserved_balance(&1), 0);
+				assert_eq!(Balances::free_balance(&1), 1000);
 
 				// and the task should be updated
 				assert!(matches!(
@@ -1556,6 +1564,34 @@ mod test {
 					MigrationTask { size: x, .. } if x > 0,
 				));
 			}
+		});
+	}
+
+	#[test]
+	fn continue_migrate_slashing_works() {
+		new_test_ext(StateVersion::V0, true, None, None).execute_with(|| {
+			assert_eq!(MigrationProcess::<Test>::get(), Default::default());
+
+			// Allow signed migrations.
+			SignedMigrationMaxLimits::<Test>::put(MigrationLimits { size: 1024, item: 5 });
+
+			// first we compute the task to get the accurate consumption.
+			let mut task = StateTrieMigration::migration_process();
+			assert_ok!(task.migrate_until_exhaustion(
+				StateTrieMigration::signed_migration_max_limits().unwrap(),
+			));
+
+			// can't submit with `real_size_upper` < `task.dyn_size` expect slashing
+			frame_support::assert_ok!(StateTrieMigration::continue_migrate(
+				RuntimeOrigin::signed(1),
+				StateTrieMigration::signed_migration_max_limits().unwrap(),
+				task.dyn_size - 1,
+				MigrationProcess::<Test>::get()
+			));
+			// no funds should remain reserved.
+			assert_eq!(Balances::reserved_balance(&1), 0);
+			// user was slashed
+			assert_eq!(Balances::free_balance(&1), 1000 - (5 * SignedDepositPerItem::get()));
 		});
 	}
 
