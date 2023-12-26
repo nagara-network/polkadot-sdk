@@ -476,8 +476,6 @@ where
 			let threshold = std::cmp::max(median, min_best_number.unwrap_or(Zero::zero()));
 			// Find a random available peer that is synced as much as peer majority and is above
 			// `min_best_number`.
-			//for (peer_id, peer) in self.peers.iter_mut() {
-
 			for peer_id in self.peer_pool.available_peers() {
 				if let Some(peer) = self.peers.get_mut(&peer_id) {
 					if peer.state.is_available() && peer.best_number >= threshold {
@@ -488,7 +486,7 @@ where
 							warn!(
 								target: LOG_TARGET,
 								"Failed to reserve peer {peer_id} in the peer pool that was \
-								 just returned as available.",
+								 just returned as available (`WarpSync`).",
 							);
 							debug_assert!(false);
 						}
