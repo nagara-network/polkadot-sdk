@@ -4,9 +4,6 @@ edition = "2021"
 repository = "https://github.com/paritytech/polkadot-sdk.git"
 license = "GPL-3.0-only"
 
-[workspace.dependencies]
-log = { version = "^0.4.20", default-features = false }
-
 [workspace]
 resolver = "2"
 
